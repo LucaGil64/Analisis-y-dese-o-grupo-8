@@ -38,7 +38,7 @@ function prepareRepartoModal() {
 
 function cargarComboTransporte(patenteActual) {
     const transportSelect = document.getElementById('repTransporte');
-    transportSelect.innerHTML = '<option value="">-- Seleccionar Vehículo --</option>';
+    transportSelect.innerHTML = '<option value="">-- Sin Vehículo Asignado --</option>';
     
     transporteList.forEach(t => {
         if (t.estado === 'Disponible' || t.patente === patenteActual) {
@@ -101,7 +101,9 @@ function procesarCheckPaquete(tracking) {
     }
 
     hojaRutaBloqueada = false;
-    document.getElementById('btnGuardarReparto').disabled = true;
+    
+    document.getElementById('btnGuardarReparto').disabled = paquetesSeleccionados.length === 0;
+    
     document.getElementById('btnAsignarHojaRuta').className = "btn btn-sm btn-success";
     document.getElementById('btnAsignarHojaRuta').innerText = "Fijar Orden de Ruta";
 
@@ -149,7 +151,6 @@ function bajarPaquete(index) {
 function lockAndAssignHojaRuta() {
     if (paquetesSeleccionados.length === 0) return;
     hojaRutaBloqueada = true;
-    document.getElementById('btnGuardarReparto').disabled = false;
     
     const btn = document.getElementById('btnAsignarHojaRuta');
     btn.className = "btn btn-sm btn-secondary";
@@ -162,21 +163,26 @@ function lockAndAssignHojaRuta() {
 function handleRepartoSubmit(e) {
     e.preventDefault();
 
-    if (!hojaRutaBloqueada) {
-        alert("Debe hacer clic en 'Fijar Orden de Ruta' primero.");
+    if (paquetesSeleccionados.length === 0) {
+        alert("Debe seleccionar al menos un paquete para crear el reparto.");
         return;
     }
 
     const checkedPersonal = Array.from(document.querySelectorAll('.check-personal:checked')).map(cb => cb.value);
-    if (checkedPersonal.length === 0 || checkedPersonal.length > 2) {
-        alert("Restricción: Asigne obligatoriamente entre 1 y un máximo de 2 operarios.");
+    if (checkedPersonal.length > 2) {
+        alert("Restricción: Asigne un máximo de 2 operarios.");
         return;
     }
 
     const idEdicion = document.getElementById('editRepartoId').value;
     const transporteSeleccionado = document.getElementById('repTransporte').value;
     
-    // Cambiar estado a "En reparto" directamente a los paquetes seleccionados
+    const tienePersonal = checkedPersonal.length > 0;
+    const tieneTransporte = transporteSeleccionado !== "";
+    const tieneHojaRuta = hojaRutaBloqueada;
+
+    const estadoAsignado = (tienePersonal && tieneTransporte && tieneHojaRuta) ? 'Listo para iniciar' : 'En preparación';
+
     paquetesSeleccionados.forEach(p => p.estado = 'En reparto');
     const codigosNuevos = paquetesSeleccionados.map(p => p.tracking);
 
@@ -185,7 +191,6 @@ function handleRepartoSubmit(e) {
         if (idxReparto > -1) {
             const antiguosTrackings = repartosList[idxReparto].paquetes.map(p => p.tracking);
             
-            // Liberar a "listo para envío" los paquetes que el usuario desmarcó en la edición
             paquetesList.forEach(p => {
                 if (antiguosTrackings.includes(p.tracking) && !codigosNuevos.includes(p.tracking)) {
                     p.estado = 'En sucursal listo para envío';
@@ -201,10 +206,7 @@ function handleRepartoSubmit(e) {
             repartosList[idxReparto].transporte = transporteSeleccionado;
             repartosList[idxReparto].personal = checkedPersonal;
             repartosList[idxReparto].paquetes = [...paquetesSeleccionados];
-            
-            if (repartosList[idxReparto].estado === 'En preparación') {
-                repartosList[idxReparto].estado = 'Listo para iniciar';
-            }
+            repartosList[idxReparto].estado = estadoAsignado;
         }
     } else {
         const nuevoReparto = {
@@ -212,7 +214,7 @@ function handleRepartoSubmit(e) {
             transporte: transporteSeleccionado,
             personal: checkedPersonal,
             paquetes: [...paquetesSeleccionados],
-            estado: 'Listo para iniciar' 
+            estado: estadoAsignado 
         };
         repartosList.push(nuevoReparto);
     }
@@ -222,7 +224,6 @@ function handleRepartoSubmit(e) {
         if (idxNewT > -1) transporteList[idxNewT].estado = 'En uso';
     }
 
-    // Actualizar la lista maestra de paquetes con el nuevo estado "En reparto"
     paquetesList.forEach(p => {
         if (codigosNuevos.includes(p.tracking)) {
             p.estado = 'En reparto';
@@ -236,10 +237,6 @@ function handleRepartoSubmit(e) {
     renderRepartoTable();
     bootstrap.Modal.getInstance(document.getElementById('repartoModal')).hide();
 }
-
-// -------------------------------------------------------------
-// RENDERIZADO DE TABLA E INYECCIÓN DE BOTONES INICIAR / FINALIZAR
-// -------------------------------------------------------------
 
 function renderRepartoTable() {
     const tbody = document.getElementById('repartoTableBody');
@@ -266,29 +263,30 @@ function renderRepartoTable() {
             actionButtons += `<button class="btn btn-sm btn-danger fw-bold" onclick="finalizarReparto(${index})">Finalizar</button>`;
         }
 
+        let vehiculoTexto = r.transporte ? r.transporte : 'N/A';
+        let personalTexto = r.personal && r.personal.length > 0 ? r.personal.join(' / ') : 'N/A';
+
         tbody.innerHTML += `
             <tr>
                 <td class="align-middle"><strong>#${r.id}</strong></td>
-                <td class="align-middle"><span class="badge bg-dark">${r.transporte}</span></td>
-                <td class="align-middle"><small>${r.personal.join(' / ')}</small></td>
+                <td class="align-middle"><span class="badge bg-dark">${vehiculoTexto}</span></td>
+                <td class="align-middle"><small>${personalTexto}</small></td>
                 <td class="align-middle"><span class="badge bg-primary">${r.paquetes.length} bultos</span></td>
                 <td class="align-middle"><span class="badge ${claseBadge}">${r.estado}</span></td>
                 <td class="align-middle">
-                    ${actionButtons}
+                    <div class="d-flex flex-nowrap gap-1">
+                        ${actionButtons}
+                    </div>
                 </td>
             </tr>`;
     });
 }
 
-// -------------------------------------------------------------
-// LÓGICA DE NEGOCIO: INICIAR REPARTO (RF22)
-// -------------------------------------------------------------
 function iniciarReparto(index) {
     if(confirm("¿Está seguro que desea dar inicio al recorrido de este reparto?")) {
         const reparto = repartosList[index];
         reparto.estado = 'En proceso';
 
-        // RF22 - El estado de los paquetes ya se encuentra en "En reparto" desde la asignación.
         localStorage.setItem('repartosListKey', JSON.stringify(repartosList));
         
         renderRepartoTable();
@@ -296,9 +294,6 @@ function iniciarReparto(index) {
     }
 }
 
-// -------------------------------------------------------------
-// LÓGICA DE NEGOCIO: FINALIZAR REPARTO (RF23)
-// -------------------------------------------------------------
 function finalizarReparto(index) {
     if(confirm("¿Confirma la finalización de este reparto? Los paquetes no entregados volverán a sucursal.")) {
         const reparto = repartosList[index];
@@ -332,16 +327,13 @@ function finalizarReparto(index) {
     }
 }
 
-// -------------------------------------------------------------
-// VISTAS DE DETALLE Y MODIFICACIÓN
-// -------------------------------------------------------------
 function verDetalleReparto(index) {
     const reparto = repartosList[index];
     repartoIdSeleccionadoDetalle = reparto.id;
 
     document.getElementById('detRepartoTitle').innerText = `Detalles Completos del Reparto #${reparto.id} - Estado: ${reparto.estado}`;
-    document.getElementById('detTransporte').innerText = `Patente Vehicular: ${reparto.transporte}`;
-    document.getElementById('detPersonal').innerText = reparto.personal.join(' y ');
+    document.getElementById('detTransporte').innerText = reparto.transporte ? `Patente Vehicular: ${reparto.transporte}` : "No asignado";
+    document.getElementById('detPersonal').innerText = reparto.personal && reparto.personal.length > 0 ? reparto.personal.join(' y ') : "No asignado";
 
     const btnModificar = document.getElementById('btnModificarDesdeDetalle');
 
@@ -384,13 +376,12 @@ function verDetalleReparto(index) {
             </tr>`;
     });
 
-    const modalDetalle = new bootstrap.Modal(document.getElementById('detalleRepartoModal'));
+    // FIX DEL BACKDROP FANTASMA: getOrCreateInstance en lugar de generar una ventana nueva
+    const modalElement = document.getElementById('detalleRepartoModal');
+    const modalDetalle = bootstrap.Modal.getOrCreateInstance(modalElement);
     modalDetalle.show();
 }
 
-// -------------------------------------------------------------
-// LÓGICA DE ENTREGAR PAQUETE DESDE EL REPARTO
-// -------------------------------------------------------------
 window.entregarPaqueteDesdeReparto = function(tracking) {
     if(confirm(`¿Confirmar la entrega del paquete ${tracking}?`)) {
         const pkgIndex = paquetesList.findIndex(p => p.tracking === tracking);
@@ -400,6 +391,7 @@ window.entregarPaqueteDesdeReparto = function(tracking) {
             
             const idxReparto = repartosList.findIndex(r => r.id == repartoIdSeleccionadoDetalle);
             if(idxReparto > -1) {
+                // Actualiza visualmente sin causar conflicto de ventanas
                 verDetalleReparto(idxReparto);
             }
         }
@@ -424,7 +416,7 @@ function dispararEdicionDesdeDetalle() {
     document.getElementById('repartoModalTitle').innerText = `Editar Reparto #${reparto.id}`;
 
     hojaRutaBloqueada = false;
-    document.getElementById('btnGuardarReparto').disabled = true;
+    document.getElementById('btnGuardarReparto').disabled = false;
     document.getElementById('btnAsignarHojaRuta').className = "btn btn-sm btn-success";
     document.getElementById('btnAsignarHojaRuta').innerText = "Fijar Orden de Ruta";
 
@@ -438,7 +430,8 @@ function dispararEdicionDesdeDetalle() {
     renderHojaRutaOrdenable();
 
     setTimeout(() => {
-        const modalReparto = new bootstrap.Modal(document.getElementById('repartoModal'));
+        // FIX DEL BACKDROP FANTASMA: getOrCreateInstance en lugar de generar una ventana nueva
+        const modalReparto = bootstrap.Modal.getOrCreateInstance(document.getElementById('repartoModal'));
         modalReparto.show();
     }, 400);
 }
