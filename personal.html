@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGISWARE - Gestión de Personal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+    <script src="js/auth.js"></script>
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand py-0" href="paquete.html">
+    <img src="image/logo_logisware_navbar.svg" alt="LOGISWARE" height="50" class="d-inline-block align-text-top">
+</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-paquetes" href="paquete.html">Paquetes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-personal" href="personal.html">Personal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-transporte" href="transporte.html">Transporte</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-repartos" href="reparto.html">Repartos</a>
+                </li>
+            </ul>
+            <span class="navbar-text me-3 text-light" id="userDisplay"></span>
+            <button class="btn btn-outline-danger btn-sm" type="button" onclick="window.logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+</nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Gestión de Personal</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personalModal" onclick="clearForm()">
+                + Dar de Alta Personal
+            </button>
+        </div>
+
+        <div class="card shadow-sm table-responsive-custom">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Legajo</th>
+                            <th>DNI</th>
+                            <th>Nombre Completo</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personalTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="personalModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="personalForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Registrar Empleado</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editIndex">
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">DNI</label>
+                                <input type="text" class="form-control" id="dni" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Sexo</label>
+                                <select class="form-select" id="sexo">
+                                    <option>Masculino</option>
+                                    <option>Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" required>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label class="form-label required">Dirección</label>
+                                <input type="text" class="form-control" id="direccion" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Teléfono</label>
+                                <input type="text" class="form-control" id="telefono" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label class="form-label required">CBU</label>
+                                <input type="text" class="form-control" id="cbu" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="js/personal.js"></script>
+</body>
+</html>

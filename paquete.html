@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGISWARE - Gestión de Paquetes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+    <script src="js/auth.js"></script>
+</head>
+<body>
+    
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand py-0" href="paquete.html">
+    <img src="image/logo_logisware_navbar.svg" alt="LOGISWARE" height="50" class="d-inline-block align-text-top">
+</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-paquetes" href="paquete.html">Paquetes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-personal" href="personal.html">Personal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-transporte" href="transporte.html">Transporte</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-repartos" href="reparto.html">Repartos</a>
+                </li>
+            </ul>
+            <span class="navbar-text me-3 text-light" id="userDisplay"></span>
+            <button class="btn btn-outline-danger btn-sm" type="button" onclick="window.logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+</nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white shadow-sm mb-3 mb-md-0">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Paquetes</h5>
+                        <h2 id="countTotal">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark shadow-sm mb-3 mb-md-0">
+                    <div class="card-body">
+                        <h5 class="card-title">En Almacén / Proceso</h5>
+                        <h2 id="countProceso">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Entregados</h5>
+                        <h2 id="countEntregados">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Panel de Paquetes </h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paqueteModal" onclick="clearPaqueteForm()">
+                + Registrar Paquete Manual
+            </button>
+        </div>
+
+        <div class="card shadow-sm table-responsive-custom">
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-hover mb-0 text-nowrap">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nro. Tracking</th>
+                            <th>Empresa (Remitente)</th>
+                            <th>Destinatario</th>
+                            <th>Dirección / CP</th>
+                            <th>Peso</th>
+                            <th>Intento de envíos</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paqueteTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="paqueteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="paqueteForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Registrar Paquete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editIndex">
+                        
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Nro. Seguimiento</label>
+                                <input type="text" class="form-control" id="tracking" placeholder="TRK123456" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label required">Peso (kg)</label>
+                                <input type="number" step="0.01" class="form-control" id="peso" placeholder="0.00" min="0.01" required>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label class="form-label required">Empresa Mayor (Remitente)</label>
+                                <input type="text" class="form-control" id="remitente" placeholder="Razón Social / Cliente Mayor" required>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label class="form-label required">Nombre del Destinatario</label>
+                                <input type="text" class="form-control" id="destinatario" placeholder="Nombre completo de quien recibe" required>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <label class="form-label required">Dirección Destinatario</label>
+                                <input type="text" class="form-control" id="direccion" placeholder="Calle, Número, Piso" required>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label required">Cód. Postal</label>
+                                <input type="text" class="form-control" id="cp" placeholder="Ej: 9000" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Paquete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="anomaliaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="anomaliaForm">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Registrar Anomalía</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="anomaliaIndex">
+                        <div class="mb-3">
+                            <label class="form-label">Nro. Seguimiento</label>
+                            <input type="text" class="form-control bg-light" id="anomaliaTracking" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Nombre de la Anomalía</label>
+                            <input type="text" class="form-control" id="anomaliaNombre" placeholder="Ej: Daño físico, Datos ilegibles" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Motivo / Descripción</label>
+                            <textarea class="form-control" id="anomaliaMotivo" rows="3" placeholder="Describa el incidente" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Legajo del Empleado Responsable</label>
+                            <input type="text" class="form-control bg-light" id="anomaliaLegajo" readonly required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger fw-bold">Confirmar Anomalía</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="verAnomaliaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Detalles de la Anomalía Registrada</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 border-bottom pb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-0">Nro. Seguimiento</label>
+                        <p id="verAnomaliaTracking" class="fs-5 text-dark fw-bold mb-0"></p>
+                    </div>
+                    <div class="mb-3 border-bottom pb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-0">Nombre de la Anomalía</label>
+                        <p id="verAnomaliaNombre" class="fs-6 text-dark mb-0"></p>
+                    </div>
+                    <div class="mb-3 border-bottom pb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-0">Motivo / Descripción</label>
+                        <p id="verAnomaliaMotivo" class="fs-6 text-dark mb-0"></p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-muted small fw-bold text-uppercase mb-0">Legajo Responsable</label>
+                            <p id="verAnomaliaLegajo" class="fs-6 text-dark mb-0"></p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-muted small fw-bold text-uppercase mb-0">Fecha y Hora</label>
+                            <p id="verAnomaliaFecha" class="fs-6 text-dark mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar Detalle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/paquete.js"></script>
+</body>
+</html>

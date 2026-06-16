@@ -1,0 +1,79 @@
+/* css/style.css */
+
+/* --- Estilos Generales --- */
+:root {
+    --primary-color: #0d6efd; /* Azul Bootstrap para Logisware */
+    --dark-bg: #212529;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+}
+
+/* --- Ajustes de la Barra de Navegación --- */
+.navbar-brand {
+    letter-spacing: 1px;
+}
+
+/* --- Pantalla de Login (index.html) --- */
+.login-container {
+    background-color: var(--light-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* --- Componentes de las Tablas y ABM --- */
+.table-responsive-custom {
+    border-radius: 8px;
+    overflow-x: auto; /* Permite scroll horizontal */
+    -webkit-overflow-scrolling: touch; /* Scroll fluido en dispositivos móviles */
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Animación básica para las ventanas modales */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+/* Estilo para las etiquetas obligatorias en los formularios */
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Soporte específico para las ventanas de Reparto y Hojas de Ruta */
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background-color: #f8f9fa;
+}
+
+#hojaRutaTableBody tr {
+    transition: background-color 0.2s ease;
+}
+
+#hojaRutaTableBody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05); /* Resaltado azul sutil al ordenar */
+}

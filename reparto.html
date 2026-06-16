@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGISWARE - Gestión de Repartos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+    <script src="js/auth.js"></script>
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand py-0" href="paquete.html">
+    <img src="image/logo_logisware_navbar.svg" alt="LOGISWARE" height="50" class="d-inline-block align-text-top">
+</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="paquete.html">Paquetes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="personal.html">Personal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transporte.html">Transporte</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="reparto.html">Repartos</a></li>
+                </ul>
+                <span class="navbar-text me-3 text-light" id="userDisplay"></span>
+                <button class="btn btn-outline-danger btn-sm" type="button" onclick="window.logout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Gestión de Repartos </h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#repartoModal" onclick="prepareRepartoModal()">
+                Crear Nuevo Reparto
+            </button>
+        </div>
+
+        <div class="card shadow-sm table-responsive-custom">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID Reparto</th>
+                            <th>Transporte (Patente)</th>
+                            <th>Personal Asignado</th>
+                            <th>Cant. Paquetes</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repartoTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="repartoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="repartoForm">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title" id="repartoModalTitle">Configurar Nuevo Reparto Logístico</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editRepartoId" value="">
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">Vehículo de Transporte</label>
+                                <select class="form-select" id="repTransporte" required>
+                                    </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Personal Asignado (Máx 2)</label>
+                                <div class="border rounded p-2" style="max-height: 100px; overflow-y: auto;" id="repPersonalContainer">
+                                    </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label required text-primary fw-bold">1. Seleccionar Paquetes para este Reparto</label>
+                                <div class="table-responsive border rounded" style="max-height: 160px;">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th style="width: 45px;" class="text-center">Llevar</th>
+                                                <th>Nro. Tracking</th>
+                                                <th>Destinatario</th>
+                                                <th>Dirección / CP</th>
+                                                <th>Peso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="repPaquetesContainer">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4 d-none" id="hojaRutaSection">
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light border rounded">
+                                    <label class="form-label mb-0 fw-bold text-success">2. Organizar Hoja de Ruta (Personalizar Orden de Entrega)</label>
+                                    <button type="button" class="btn btn-sm btn-success" id="btnAsignarHojaRuta" onclick="lockAndAssignHojaRuta()">
+                                        Fijar Orden de Ruta
+                                    </button>
+                                </div>
+                                <div class="table-responsive border rounded">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th style="width: 70px;" class="text-center">Prioridad</th>
+                                                <th>Tracking</th>
+                                                <th>Destinatario y Dirección</th>
+                                                <th style="width: 110px;" class="text-center">Cambiar Orden</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="hojaRutaOrdenableBody">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardarReparto" disabled>Guardar Reparto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detalleRepartoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="detRepartoTitle">Detalles del Reparto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-4 bg-light p-3 rounded border">
+                        <div class="col-md-6 mb-2 mb-md-0">
+                            <h6 class="text-muted text-uppercase small font-weight-bold">Vehículo Asignado</h6>
+                            <p class="mb-0 fs-5 text-dark" id="detTransporte">Cargando...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase small font-weight-bold">Personal Operativo</h6>
+                            <p class="mb-0 fs-5 text-dark" id="detPersonal">Cargando...</p>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success border-bottom pb-2 mb-3">Hoja de Ruta Oficial Ordenada</h5>
+                    <div class="table-responsive border rounded shadow-sm">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-primary text-white">
+                                <tr>
+                                    <th style="width: 80px;" class="text-center">Secuencia</th>
+                                    <th>Nro. Tracking</th>
+                                    <th>Destinatario</th>
+                                    <th>Dirección de Destino</th>
+                                    <th>Peso</th>
+                                    <th class="text-center">Estado Paquete</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detHojaRutaTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-warning text-dark fw-bold" id="btnModificarDesdeDetalle" onclick="dispararEdicionDesdeDetalle()">
+                        Modificar Reparto
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar Detalle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/reparto.js"></script>
+</body>
+</html>s
